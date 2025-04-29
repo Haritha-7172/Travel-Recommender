@@ -1,1 +1,161 @@
+{% extends 'layout.html' %}
+
+{% block title %}Find Your Perfect Destination{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0 text-center">Find Your Perfect Destination</h2>
+                </div>
+                <div class="card-body">
+                    {% if 'user_name' in session %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-user me-2"></i> Welcome back, {{ session['user_name'] }}!
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-4">
+                        <p class="lead text-center">Tell us your travel preferences and we'll recommend the perfect destinations for you!</p>
+                    </div>
+                    
+                    <form id="search-form" action="{{ url_for('search') }}" method="POST">
+                        <div class="row g-3">
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="destination_type" class="form-label">Destination Type</label>
+                                    <select class="form-select" id="destination_type" name="destination_type">
+                                        <option value="" selected>All Types</option>
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="budget" class="form-label">Budget (INR)</label>
+                                    <input type="number" class="form-control" id="budget" name="budget" placeholder="Enter your maximum budget" min="0">
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="climate" class="form-label">Climate</label>
+                                    <select class="form-select" id="climate" name="climate">
+                                        <option value="" selected>Any Climate</option>
+                                        
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="days" class="form-label">Number of Days</label>
+                                    <input type="number" class="form-control" id="days" name="days" placeholder="How many days?" min="1">
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="accommodation_type" class="form-label">Accommodation Type</label>
+                                    <select class="form-select" id="accommodation_type" name="accommodation_type">
+                                        <option value="" selected>Any Accommodation</option>
+                                        {% for type in accommodation_types %}
+                                            <option value="{{ type }}">{{ type }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="col-12 text-center mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg px-5">
+                                    <i class="fas fa-search me-2"></i> Find Destinations
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            
+            <div class="row mt-5">
+                <div class="col-12 text-center mb-4">
+                    <h3>Why Choose Our Travel Recommender?</h3>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-compass fa-3x text-primary mb-3"></i>
+                            <h4 class="card-title">Personalized Recommendations</h4>
+                            <p class="card-text">Get travel suggestions tailored to your specific preferences and budget.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-dollar-sign fa-3x text-primary mb-3"></i>
+                            <h4 class="card-title">Budget-Friendly Options</h4>
+                            <p class="card-text">Find amazing destinations that fit within your budget constraints.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 text-center">
+                        <div class="card-body">
+                            <i class="fas fa-map-marked-alt fa-3x text-primary mb-3"></i>
+                            <h4 class="card-title">Detailed Information</h4>
+                            <p class="card-text">Get comprehensive details about accommodations, activities, and climate.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/form_validation.js') }}"></script>
+<script>
+    
+    fetch('/api/destination_types')
+        .then(response => response.json())
+        .then(types => {
+            const select = document.getElementById('destination_type');
+            types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type;
+                option.textContent = type;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching destination types:', error));
+    
+    
+    fetch('/api/climates')
+        .then(response => response.json())
+        .then(climates => {
+            const select = document.getElementById('climate');
+            climates.forEach(climate => {
+                const option = document.createElement('option');
+                option.value = climate;
+                option.textContent = climate;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => console.error('Error fetching climates:', error));
+</script>
+{% endblock %}
 
