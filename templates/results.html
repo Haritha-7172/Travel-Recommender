@@ -1,0 +1,232 @@
+{% extends 'layout.html' %}
+
+{% block title %}Recommended Destinations{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h2 class="card-title">
+                        <i class="fas fa-list me-2"></i>Your Recommended Destinations
+                    </h2>
+                    <div class="mt-3">
+                        <h5>Search Criteria:</h5>
+                        <ul class="list-group list-group-horizontal flex-wrap">
+                            {% if search_params.destination_type %}
+                                <li class="list-group-item m-1">Type: {{ search_params.destination_type }}</li>
+                            {% endif %}
+                            
+                            {% if search_params.budget %}
+                                <li class="list-group-item m-1">Budget: ₹{{ search_params.budget }}</li>
+                            {% endif %}
+                            
+                            {% if search_params.climate %}
+                                <li class="list-group-item m-1">Climate: {{ search_params.climate }}</li>
+                            {% endif %}
+                            
+                            {% if search_params.days %}
+                                <li class="list-group-item m-1">Days: {{ search_params.days }}</li>
+                            {% endif %}
+                            
+                            {% if search_params.accommodation_type %}
+                                <li class="list-group-item m-1">Accommodation: {{ search_params.accommodation_type }}</li>
+                            {% endif %}
+                        </ul>
+                        <a href="{{ url_for('index') }}" class="btn btn-outline-secondary mt-3">
+                            <i class="fas fa-search me-1"></i> New Search
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        {% if destinations %}
+            {% for destination in destinations %}
+                <div class="col-lg-6 mb-4">
+                    <div class="card shadow h-100">
+                        <div class="card-header bg-info text-white">
+                            <h3 class="mb-0">{{ destination.destination.Name }}</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between mb-3">
+                                <span class="badge bg-primary">{{ destination.destination.Type }}</span>
+                                <span class="badge bg-success">Avg. Cost: ₹{{ destination.destination.avg_cost }}</span>
+                            </div>
+                            
+                            
+                            <div class="mb-3">
+                                <h5>Climate:</h5>
+                                <div class="d-flex flex-wrap">
+                                    {% for climate_type in destination.climate %}
+                                        <span class="badge bg-warning text-dark me-2 mb-2">{{ climate_type }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            
+                            
+                            <div class="mb-3">
+                                <h5>Accommodation Options:</h5>
+                                <ul class="list-group">
+                                    {% for acc in destination.accommodations %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>
+                                                <i class="fas fa-building me-2"></i>
+                                                {{ acc.Name }} ({{ acc.type }})
+                                            </span>
+                                            <span class="badge bg-info text-white">
+                                                ₹{{ acc.cost_per_night }} per night
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            
+                            <div class="mb-3">
+                                <h5>Activities:</h5>
+                                <ul class="list-group">
+                                    {% for activity in destination.activities %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <span>
+                                                <i class="fas fa-hiking me-2"></i>
+                                                {{ activity.Act_name }}
+                                            </span>
+                                            <span class="badge bg-primary">
+                                                ₹{{ activity.Act_cost }}
+                                            </span>
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                            
+                            
+                            <div class="mt-4 text-center">
+                                <a href="#" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detailsModal{{ destination.destination.dest_id }}">
+                                    <i class="fas fa-info-circle me-1"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                
+                <div class="modal fade" id="detailsModal{{ destination.destination.dest_id }}" tabindex="-1" aria-labelledby="detailsModalLabel{{ destination.destination.dest_id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header bg-info text-white">
+                                <h5 class="modal-title" id="detailsModalLabel{{ destination.destination.dest_id }}">{{ destination.destination.Name }} Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <h5>Destination Info:</h5>
+                                        <ul class="list-group">
+                                            <li class="list-group-item">Type: {{ destination.destination.Type }}</li>
+                                            <li class="list-group-item">Average Cost: ₹{{ destination.destination.avg_cost }}</li>
+                                            <li class="list-group-item">
+                                                Climate: 
+                                                {% for climate_type in destination.climate %}
+                                                    <span class="badge bg-warning text-dark me-1">{{ climate_type }}</span>
+                                                {% endfor %}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5>Budget Planning:</h5>
+                                        {% set total_activities = 0 %}
+                                        {% for activity in destination.activities %}
+                                            {% set total_activities = total_activities + activity.Act_cost %}
+                                        {% endfor %}
+                                        
+                                        {% if destination.accommodations %}
+                                            {% set min_acc = destination.accommodations|map(attribute='cost_per_night')|min %}
+                                            {% set max_acc = destination.accommodations|map(attribute='cost_per_night')|max %}
+                                        {% else %}
+                                            {% set min_acc = 0 %}
+                                            {% set max_acc = 0 %}
+                                        {% endif %}
+                                        
+                                        <ul class="list-group">
+                                            <li class="list-group-item">Accommodation: ₹{{ min_acc }} - ₹{{ max_acc }} per night</li>
+                                            <li class="list-group-item">Activities (Total): ₹{{ total_activities }}</li>
+                                            <li class="list-group-item">
+                                                Estimated Total (3 days): 
+                                                ₹{{ (min_acc * 3) + total_activities }} - ₹{{ (max_acc * 3) + total_activities }}
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>All Available Accommodations:</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Name</th>
+                                                    <th>Type</th>
+                                                    <th>Cost Per Night</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for acc in destination.accommodations %}
+                                                    <tr>
+                                                        <td>{{ acc.Name }}</td>
+                                                        <td>{{ acc.type }}</td>
+                                                        <td>₹{{ acc.cost_per_night }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <h5>All Available Activities:</h5>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>Activity</th>
+                                                    <th>Cost</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for activity in destination.activities %}
+                                                    <tr>
+                                                        <td>{{ activity.Act_name }}</td>
+                                                        <td>₹{{ activity.Act_cost }}</td>
+                                                    </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No destinations found matching your criteria. Please try different search parameters.
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i> Try a New Search
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
